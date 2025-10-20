@@ -1,40 +1,11 @@
 {
   "readings": [
     {
-      "sensor_reading": 527
+      "sensor_reading": 519
     },
     {
-      "sensor_reading": 511
-    },
-    {
-      "sensor_reading": 527
-    },
-    {
-      "sensor_reading": 471
-    },
-    {
-      "sensor_reading": 471
-    },
-    {
-      "sensor_reading": 483
-    },
-    {
-      "sensor_reading": 463
-    },
-    {
-      "sensor_reading": 460
-    },
-    {
-      "sensor_reading": 460
-    },
-    {
-      "sensor_reading": 100
-    },
-    {
-      "sensor_reading": 515
-    },
-    {
-      "sensor_reading": 3644
+      "sensor_reading": 115
     }
-  ]
+  ],
+  "lightState": true
 }

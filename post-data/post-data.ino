@@ -1,7 +1,7 @@
 #include "secret.hpp"
 #include <WiFiNINA.h>
 
-const int PHOTO_PIN = A0;
+const int PHOTO_PIN = A0; //phototransisotr attached here
 const int BUTTON_PIN = 2;
 const int NUM_SAMPLES = 10;
 
@@ -9,13 +9,12 @@ char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
 int status = WL_IDLE_STATUS;
 
-const char* server = "62be2b50b344.ngrok-free.app";
+// for my testing 
+const char* server = "981b9dd87b99.ngrok-free.app";
 const int port = 80;  // Change to 80
 const char* endpoint = "/data";
 
 WiFiClient client;  // Change back to WiFiClient (not SSL)
-
-
 
 void setup() {
   Serial.begin(9600);
@@ -54,7 +53,7 @@ void loop() {
     
     sendLightReading(lightLevel);
     
-    delay(500);
+    delay(500); 
   }
   
   delay(100);
@@ -82,21 +81,25 @@ void connectWiFi() {
 }
 
 void sendLightReading(int lightLevel) {
+  //make sure we are connected before trying to send the data
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("No WiFi - skipping request");
     return;
   }
 
+  //just to debug 
   Serial.print("Attempting connection to ");
   Serial.print(server);
   Serial.print(":");
   Serial.println(port);
   
+  //attempt to connect to the server at the port 
   if (client.connect(server, port)) {
-    Serial.println("Sending data...");
+    Serial.println("Sending data..."); //connection successful, lets send some data
     
-    String payload = "{\"sensor_reading\":" + String(lightLevel) + "}";
+    String payload = "{\"sensor_reading\":" + String(lightLevel) + "}"; //formats the data, the "sensor_reading" is the key that will get put into the json, the lightlevel is the value
     
+    // this builds the http request, we won't see it in the terminal 
     client.println("POST " + String(endpoint) + " HTTP/1.1");
     client.println("Host: " + String(server));
     client.println("Content-Type: application/json");
@@ -108,12 +111,13 @@ void sendLightReading(int lightLevel) {
     
     delay(100);
     
+    //the server sends back a responds, this is how we see it. 
     while (client.available()) {
       String line = client.readStringUntil('\n');
       Serial.println(line);
     }
     
-    client.stop();
+    client.stop(); //ends the request
     Serial.println("Request complete");
   } else {
     Serial.println("Connection to server failed");

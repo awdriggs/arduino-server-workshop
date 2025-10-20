@@ -1,5 +1,6 @@
 const int PHOTO_PIN = A0;
 const int BUTTON_PIN = 2;
+const int LED_PIN = 3;
 const int NUM_SAMPLES = 10;
 
 void setup() {
@@ -7,6 +8,7 @@ void setup() {
   analogReadResolution(12);
   pinMode(PHOTO_PIN, INPUT);
   pinMode(BUTTON_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
@@ -22,7 +24,13 @@ void loop() {
 
     Serial.print("Light Level: ");
     Serial.println(lightLevel);
+    
+    digitalWrite(LED_PIN, HIGH);
 
     delay(200); // Debounce - prevents multiple readings from one press
+  } else {
+    digitalWrite(LED_PIN, LOW);
   }
+
+
 }

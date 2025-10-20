@@ -16,12 +16,11 @@
 - Node.js installed
 - Install [ngrok](https://www.npmjs.com/package/ngrok) (`npm install ngrok`)
 
+## Reading Data from a Server
+
 ## Pushing Data to a Server
-
-
 
 for testing with ngrok...
 start your local server with node.
 in a another terminal window, run `ngrok http 3000 --scheme=http`
 
-## Reading Data from a Server
