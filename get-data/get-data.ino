@@ -4,28 +4,33 @@
 
 const int LED_PIN = 3;
 
-// get the secrets for the .hpp file 
+// get the secrets for the .hpp file
 char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
 
 // hold the wifi status in this variable
 int status = WL_IDLE_STATUS;
 
-
-const char* server = "981b9dd87b99.ngrok-free.app";
-const int port = 80;  // Change to 80
+//for "production" use ssl for secure connection
+const char* server = "arduino-workshop-server.onrender.com"; //url no http or https!
+const int port = 443;
 const char* endpoint = "/led";
+WiFiSSLClient client;
 
-WiFiClient client;  
+// for local tessting using ngrok with http, insecure
+/* const char* server = "981b9dd87b99.ngrok-free.app"; */
+/* const int port = 80;  // Change to 80 */
+/* const char* endpoint = "/led"; */
 
-//for "production" use ssl
+/* WiFiClient client; //using basic http */
+
 
 void setup() {
   Serial.begin(9600);
   while (!Serial);
-  
+
   pinMode(LED_PIN, OUTPUT);
-  
+
   connectWiFi(); //connects to the wifi
 }
 
@@ -38,24 +43,24 @@ void loop() {
   } else {
     digitalWrite(LED_BUILTIN, HIGH); // LED on when connected
   }
-   
-   
-  getLEDStatus(); 
+
+
+  getLEDStatus();
   delay(3000); //poll the server every 3 seconds
 }
 
 void connectWiFi() {
   status = WL_IDLE_STATUS;
   digitalWrite(LED_BUILTIN, LOW); // LED off while connecting
-  
+
   while (status != WL_CONNECTED) {
     Serial.print("Attempting to connect to network: ");
     Serial.println(ssid);
-    
+
     status = WiFi.begin(ssid, pass);
     delay(10000);
   }
-  
+
   digitalWrite(LED_BUILTIN, HIGH); // LED on when connected
   Serial.println("You're connected to the network");
   Serial.println("---------------------------------------");
@@ -65,9 +70,9 @@ void connectWiFi() {
   Serial.println("---------------------------------------");
 }
 
-//claude wrote this, I added the comments
+//claude helped write this, comments all me
 void getLEDStatus() {
-  if (WiFi.status() != WL_CONNECTED) { //see if we are still connected o the wifi 
+  if (WiFi.status() != WL_CONNECTED) { //see if we are still connected o the wifi
     Serial.println("No WiFi - skipping request");
     return; //this will exit this function
   }
@@ -88,7 +93,7 @@ void getLEDStatus() {
       if (millis() - timeout > 5000) {
         Serial.println("Timeout");
         client.stop();
-        return;
+        return; //time out, exit funciton
       }
     }
 
@@ -98,12 +103,11 @@ void getLEDStatus() {
       response += client.readString();
     }
 
-    //uncomment to see what the ther server send 
-    /* Serial.println("--- Raw Response ---"); */
-    /* Serial.println(response); */
-    /* Serial.println("--- End Response ---"); */
+    //uncomment to see what the full server send, good for debugging
+    Serial.println("--- Raw Response ---");
+    Serial.println(response);
+    Serial.println("--- End Response ---");
 
-     
     // Find where JSON body starts (after empty line)
     int bodyStart = response.indexOf("\r\n\r\n"); // first look for end lines and returns
     if (bodyStart == -1) { // nothing found?
@@ -111,9 +115,28 @@ void getLEDStatus() {
     }
 
     if (bodyStart != -1) { //this is true as long as an index value was found above
-      String jsonBody = response.substring(bodyStart); //use the start index and get the rest of the string, ignoring the headers
-      jsonBody.trim(); //get rid of white space in the json
 
+      String body = response.substring(bodyStart);
+      body.trim();
+
+      String jsonBody;
+
+
+      // this bit is for finding the body in the server response
+      // different servers will package the response differently, this should find the jsonbody regardless of server setup
+      // Check if using chunked transfer encoding
+      if (response.indexOf("Transfer-Encoding: chunked") != -1) {
+        // Chunked: skip chunk size line and trailing markers
+        int firstNewline = body.indexOf('\n');
+        int lastNewline = body.lastIndexOf('\n');
+        jsonBody = body.substring(firstNewline + 1, lastNewline);
+        jsonBody.trim();
+      } else {
+        // Regular response: body is already the JSON
+        jsonBody = body;
+      }
+
+      //check the json
       Serial.print("JSON Body: ");
       Serial.println(jsonBody);
 
@@ -129,7 +152,6 @@ void getLEDStatus() {
         // Extract lightState (matching your server's JSON key)
         bool ledStatus = doc["lightState"]; //this gets the value given the "lightState" key from our json.
 
-         
         digitalWrite(LED_PIN, ledStatus ? HIGH : LOW); //ternery op, if the ledStatus is true, turn the light on, else turn it off
 
         Serial.print("LED on D3: ");

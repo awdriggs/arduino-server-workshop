@@ -11,12 +11,17 @@ char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
 int status = WL_IDLE_STATUS;
 
-// for my testing
-const char* server = "981b9dd87b99.ngrok-free.app";
-const int port = 80;  // Change to 80
+//for "production" use ssl for secure connection
+const char* server = "arduino-workshop-server.onrender.com"; //url no http or https!
+const int port = 443;
 const char* endpoint = "/data";
+WiFiSSLClient client;
 
-WiFiClient client;  // Change back to WiFiClient (not SSL)
+// for local tessting using ngrok with http, insecure
+/* const char* server = "981b9dd87b99.ngrok-free.app"; */
+/* const int port = 80;  // Change to 80 */
+/* const char* endpoint = "/data"; */
+/* WiFiClient client; //using basic http */
 
 void setup() {
   Serial.begin(9600);
@@ -82,47 +87,54 @@ void connectWiFi() {
   Serial.println("---------------------------------------");
 }
 
+// claude helped write this, comments are mine
 void sendLightReading(int lightLevel) {
-  //make sure we are connected before trying to send the data
-  if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED) { //if the wifi isn't connected you can't send shit
     Serial.println("No WiFi - skipping request");
-    return;
+    return; //exit without any actions
   }
 
-  //just to debug
   Serial.print("Attempting connection to ");
   Serial.print(server);
   Serial.print(":");
   Serial.println(port);
 
-  //attempt to connect to the server at the port
   if (client.connect(server, port)) {
-    Serial.println("Sending data..."); //connection successful, lets send some data
+    Serial.println("Sending data...");
 
-    String payload = "{\"sensor_reading\":" + String(lightLevel) + "}"; //formats the data, the "sensor_reading" is the key that will get put into the json, the lightlevel is the value
+    String payload = "{\"sensor_reading\":" + String(lightLevel) + "}";
 
     /* String payload = "{\"sensor_reading\":" + String(lightLevel) + */
     /*   ",\"sensor_id\":\"" + String(SENSOR_ID) + "\"}"; */
 
-    // this builds the http request, we won't see it in the terminal
-    client.println("POST " + String(endpoint) + " HTTP/1.1");
-    client.println("Host: " + String(server));
-    client.println("Content-Type: application/json");
-    client.print("Content-Length: ");
-    client.println(payload.length());
-    client.println("Connection: close");
+    //this builds the string for the http request
+    client.println("POST " + String(endpoint) + " HTTP/1.1"); //type of request we are making
+    client.println("Host: " + String(server)); //where is it going?
+    client.println("Content-Type: application/json"); //what type of data is it?
+    client.print("Content-Length: "); //how long is the message? this is used for error checking
+    client.println(payload.length()); //the length
+    client.println("Connection: close"); //what to do at the end of message
     client.println();
-    client.println(payload);
+    client.println(payload); //this is the body of the message, our json data
 
-    delay(100);
+    // Wait for response with timeout
+    // if you don't head back if 5 seconds it failed
+    unsigned long timeout = millis();
+    while (client.available() == 0) {
+      if (millis() - timeout > 5000) { 
+        Serial.println("Timeout waiting for response");
+        client.stop();
+        return;
+      }
+    }
 
-    //the server sends back a responds, this is how we see it.
+    // Read the response that the server is sending back
     while (client.available()) {
       String line = client.readStringUntil('\n');
       Serial.println(line);
     }
 
-    client.stop(); //ends the request
+    client.stop(); //we're done here!
     Serial.println("Request complete");
   } else {
     Serial.println("Connection to server failed");
