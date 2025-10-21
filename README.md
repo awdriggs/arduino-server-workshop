@@ -18,6 +18,8 @@
 
 ### Infastructure
 - Render account for hosting your server.
+- Copy and Paste the contents of `basic_server` to have a simple node/express/lowdb server ready for remixing
+
 
 ## Some Helpful Utilities 
 Maybe you want to test your server routes without a frontend interface. There are a few tools to do this.
@@ -37,9 +39,17 @@ This allows you to do different types of requests to servers and apis.
 Both of these tools are super helpful outside the context of Arduino! I use them a lot for testing/debugging.
 
 ## Notes on wifiNINA
+All the Arduino examples in this repo will work with an Arduino Nano IOT.
 
+The Arduino Nano IOT has a module on the board for wifi communication. To use this module you must use the wifiNINA library. This handles connects to wifi and also has built in objects for the Arduino to act as a client or a server.
 
-### Advanced
+[Link to Documentation](https://docs.arduino.cc/libraries/wifinina/)
+
+A different Arduino board will need a different wifi library to match it's wifi module.
+
+## Advanced
+
+### Using Ngrok for local testing
 When testing, Arduino can't connect to `localhost:3000` but you can install [ngrok](https://www.npmjs.com/package/ngrok) (`npm install ngrok`), this allows you to pass through internet traffic to your local machine easily. 
 Ngrok is used to easily forward web traffic from a url hosted on their server to your local machine. Now any arduino with the ngrok address can access your local server while ngrok is running. 
 This way you can test out your server with arduino before pushing your server to Render.
