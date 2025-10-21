@@ -8,13 +8,14 @@
   <h1>Arduino + Node</h1>
  
   <h2>Example 1</h2>
-  <p>This button toggles as boolean value on the server. Any Arduinon listening for changes will turn its light on/off to match</p>
+  <p>This button toggles a boolean value on the server. Any Arduino listening for changes will turn its light on/off to match the status of the button</p>
   <div>
     <label>LED State</label>
     <button id="lightToggle">FETCHING...</button>
   </div>
 
   <h2>Example 2</h2>
+  <p>Sensor readings from arudino will be printed below. This updates every 3 seconds using javascript polling</p>
   <pre id="log">
     sensor readings inject here
   </pre>

@@ -23,6 +23,10 @@ WiFiSSLClient client;
 /* const char* endpoint = "/data"; */
 /* WiFiClient client; //using basic http */
 
+//for polling
+unsigned long previousMillis = 0; // Store last reading time
+const int READING_INTERVAL = 60000; // 60 seconds in milliseconds
+
 void setup() {
   Serial.begin(9600);
   while (!Serial);
@@ -45,6 +49,7 @@ void loop() {
     digitalWrite(LED_BUILTIN, HIGH); // LED on when connected
   }
 
+  //send a reading if the button was pressed
   if (digitalRead(BUTTON_PIN) == HIGH) {
     long sum = 0;
 
@@ -62,6 +67,29 @@ void loop() {
 
     delay(500);
   }
+
+  //polling, send a reading every 60 seconds
+  // Check if 60 seconds have passed
+  /*
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= READING_INTERVAL) {
+    previousMillis = currentMillis; // Save the last reading time
+    
+    // Take averaged reading
+    long sum = 0;
+    for(int i = 0; i < NUM_SAMPLES; i++) {
+      sum += analogRead(PHOTO_PIN);
+      delayMicroseconds(100);
+    }
+    
+    int lightLevel = sum / NUM_SAMPLES;
+    
+    Serial.print("Light Level: ");
+    Serial.println(lightLevel);
+    
+    sendLightReading(lightLevel);
+  }
+  */
 
   delay(100);
 }

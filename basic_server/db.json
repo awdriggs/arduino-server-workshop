@@ -1,15 +1,4 @@
 {
-  "readings": [
-    {
-      "sensor_reading": 519
-    },
-    {
-      "sensor_reading": 115
-    },
-    null,
-    {
-      "light_reading": 13
-    }
-  ],
+  "readings": [],
   "lightState": true
 }
