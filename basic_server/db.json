@@ -5,6 +5,10 @@
     },
     {
       "sensor_reading": 115
+    },
+    null,
+    {
+      "light_reading": 13
     }
   ],
   "lightState": true
