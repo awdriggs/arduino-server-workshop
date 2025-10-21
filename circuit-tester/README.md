@@ -1,8 +1,8 @@
 # Circuit Tester
 
 # Build the Circuit
-![circuit_photo.png](picture of circuit)
-![circuit.png](fritzing diagram)
+![photo of the circuit](circuit_photo.png)
+![fritzing diagram](circuit.png)
 
 Connect the top button let to 3.3V rail.
 Connect the bottom button leg to pin D2 with a 10k ohm pull down resistor to ground rail.
