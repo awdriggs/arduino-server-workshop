@@ -1,4 +1,12 @@
 {
-  "readings": [],
+  "readings": [
+    {
+      "sensor_reading": 13
+    },
+    {
+      "sensor_reading": 558,
+      "sensor_id": "contact-basement"
+    }
+  ],
   "lightState": true
 }

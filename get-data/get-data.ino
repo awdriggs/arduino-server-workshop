@@ -15,7 +15,7 @@ int status = WL_IDLE_STATUS;
 const char* server = "arduino-workshop-server.onrender.com"; //url no http or https!
 const int port = 443;
 const char* endpoint = "/led";
-WiFiSSLClient client;
+WiFiSSLClient client; //from wifinina
 
 // for local tessting using ngrok with http, insecure
 /* const char* server = "981b9dd87b99.ngrok-free.app"; */

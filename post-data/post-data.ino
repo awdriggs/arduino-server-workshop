@@ -1,31 +1,31 @@
 #include "secret.hpp"
 #include <WiFiNINA.h>
 
-const int PHOTO_PIN = A0; //phototransisotr attached here
+const int PHOTO_PIN = A0;  //phototransisotr attached here
 const int BUTTON_PIN = 2;
 const int NUM_SAMPLES = 10;
 
-/* const char* SENSOR_ID = "sensor_01"; */
+const char* SENSOR_ID = "contact-basement";
 
 char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
 int status = WL_IDLE_STATUS;
 
 //for "production" use ssl for secure connection
-const char* server = "arduino-workshop-server.onrender.com"; //url no http or https!
-const int port = 443;
-const char* endpoint = "/data";
-WiFiSSLClient client;
+// const char* server = "arduino-workshop-server.onrender.com"; //url no http or https!
+// const int port = 443;
+// const char* endpoint = "/data";
+// WiFiSSLClient client;
 
 // for local tessting using ngrok with http, insecure
-/* const char* server = "981b9dd87b99.ngrok-free.app"; */
-/* const int port = 80;  // Change to 80 */
-/* const char* endpoint = "/data"; */
-/* WiFiClient client; //using basic http */
+const char* server = "367cc6056924.ngrok-free.app";
+const int port = 80;  // Change to 80
+const char* endpoint = "/data";
+WiFiClient client;  //using basic http
 
 //for polling
-unsigned long previousMillis = 0; // Store last reading time
-const int READING_INTERVAL = 60000; // 60 seconds in milliseconds
+unsigned long previousMillis = 0;    // Store last reading time
+const int READING_INTERVAL = 60000;  // 60 seconds in milliseconds
 
 void setup() {
   Serial.begin(9600);
@@ -42,18 +42,18 @@ void setup() {
 void loop() {
   // Check WiFi and update LED
   if (WiFi.status() != WL_CONNECTED) {
-    digitalWrite(LED_BUILTIN, LOW); // LED off when disconnected
+    digitalWrite(LED_BUILTIN, LOW);  // LED off when disconnected
     Serial.println("WiFi disconnected! Reconnecting...");
     connectWiFi();
   } else {
-    digitalWrite(LED_BUILTIN, HIGH); // LED on when connected
+    digitalWrite(LED_BUILTIN, HIGH);  // LED on when connected
   }
 
   //send a reading if the button was pressed
   if (digitalRead(BUTTON_PIN) == HIGH) {
     long sum = 0;
 
-    for(int i = 0; i < NUM_SAMPLES; i++) {
+    for (int i = 0; i < NUM_SAMPLES; i++) {
       sum += analogRead(PHOTO_PIN);
       delayMicroseconds(100);
     }
@@ -96,7 +96,7 @@ void loop() {
 
 void connectWiFi() {
   status = WL_IDLE_STATUS;
-  digitalWrite(LED_BUILTIN, LOW); // LED off while connecting
+  digitalWrite(LED_BUILTIN, LOW);  // LED off while connecting
 
   while (status != WL_CONNECTED) {
     Serial.print("Attempting to connect to network: ");
@@ -106,7 +106,7 @@ void connectWiFi() {
     delay(10000);
   }
 
-  digitalWrite(LED_BUILTIN, HIGH); // LED on when connected
+  digitalWrite(LED_BUILTIN, HIGH);  // LED on when connected
   Serial.println("You're connected to the network");
   Serial.println("---------------------------------------");
   IPAddress ip = WiFi.localIP();
@@ -117,9 +117,9 @@ void connectWiFi() {
 
 // claude helped write this, comments are mine
 void sendLightReading(int lightLevel) {
-  if (WiFi.status() != WL_CONNECTED) { //if the wifi isn't connected you can't send shit
+  if (WiFi.status() != WL_CONNECTED) {  //if the wifi isn't connected you can't send shit
     Serial.println("No WiFi - skipping request");
-    return; //exit without any actions
+    return;  //exit without any actions
   }
 
   Serial.print("Attempting connection to ");
@@ -130,26 +130,25 @@ void sendLightReading(int lightLevel) {
   if (client.connect(server, port)) {
     Serial.println("Sending data...");
 
-    String payload = "{\"sensor_reading\":" + String(lightLevel) + "}";
+    // String payload = "{\"sensor_reading\":" + String(lightLevel) + "}";
 
-    /* String payload = "{\"sensor_reading\":" + String(lightLevel) + */
-    /*   ",\"sensor_id\":\"" + String(SENSOR_ID) + "\"}"; */
+    String payload = "{\"sensor_reading\":" + String(lightLevel) + ",\"sensor_id\":\"" + String(SENSOR_ID) + "\"}";
 
     //this builds the string for the http request
-    client.println("POST " + String(endpoint) + " HTTP/1.1"); //type of request we are making
-    client.println("Host: " + String(server)); //where is it going?
-    client.println("Content-Type: application/json"); //what type of data is it?
-    client.print("Content-Length: "); //how long is the message? this is used for error checking
-    client.println(payload.length()); //the length
-    client.println("Connection: close"); //what to do at the end of message
+    client.println("POST " + String(endpoint) + " HTTP/1.1");  //type of request we are making
+    client.println("Host: " + String(server));                 //where is it going?
+    client.println("Content-Type: application/json");          //what type of data is it?
+    client.print("Content-Length: ");                          //how long is the message? this is used for error checking
+    client.println(payload.length());                          //the length
+    client.println("Connection: close");                       //what to do at the end of message
     client.println();
-    client.println(payload); //this is the body of the message, our json data
+    client.println(payload);  //this is the body of the message, our json data
 
     // Wait for response with timeout
     // if you don't head back if 5 seconds it failed
     unsigned long timeout = millis();
     while (client.available() == 0) {
-      if (millis() - timeout > 5000) { 
+      if (millis() - timeout > 5000) {
         Serial.println("Timeout waiting for response");
         client.stop();
         return;
@@ -162,7 +161,7 @@ void sendLightReading(int lightLevel) {
       Serial.println(line);
     }
 
-    client.stop(); //we're done here!
+    client.stop();  //we're done here!
     Serial.println("Request complete");
   } else {
     Serial.println("Connection to server failed");
