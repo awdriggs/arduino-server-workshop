@@ -27,7 +27,7 @@ WiFiSSLClient client;
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial);
+  /* while (!Serial); //for debug */ 
 
   pinMode(LED_PIN, OUTPUT);
 

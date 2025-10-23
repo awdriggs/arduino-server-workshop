@@ -29,7 +29,7 @@ const int READING_INTERVAL = 60000; // 60 seconds in milliseconds
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial);
+  /* while (!Serial); //for debugging */
 
   analogReadResolution(12);
   pinMode(PHOTO_PIN, INPUT);
